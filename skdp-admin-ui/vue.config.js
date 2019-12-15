@@ -18,7 +18,17 @@ module.exports = {
   publicPath,
   lintOnSave: true,
   devServer: {
-    publicPath // 和 publicPath 保持一致
+    publicPath, // 和 publicPath 保持一致
+    //  代理服务器
+    proxy: {
+      '/api': {
+        target: process.env.VUE_APP_API,
+        changeOrigin: true,
+        pathRewrite: {
+          '^/api': '/'
+        }
+      }
+    }
   },
   css: {
     loaderOptions: {
