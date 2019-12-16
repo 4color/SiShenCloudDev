@@ -2,8 +2,8 @@ package initapp
 
 import (
 	"fmt"
-	"github.com/4color/SiShenCloudDev/skdp-admin-service/cmd/checkcode"
-	"github.com/4color/SiShenCloudDev/skdp-admin-service/cmd/login"
+	"github.com/4color/SiShenCloudDev/skdp-admin-service/api/checkcode"
+	"github.com/4color/SiShenCloudDev/skdp-admin-service/api/login"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -23,7 +23,7 @@ func InitRouter()  {
 		v1.POST("/checkcode", checkcode.CheckCodeVerifyHandle)
 
 		//登陆
-		v1.POST("/login", login.Login)
+		v1.POST("/manager/login", login.Login)
 	}
 }
 

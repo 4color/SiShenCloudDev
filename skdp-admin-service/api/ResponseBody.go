@@ -1,4 +1,4 @@
-package cmd
+package api
 
 type ResponseBodyModel struct {
 	Status  int         `json:"status"`

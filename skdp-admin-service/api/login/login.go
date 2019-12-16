@@ -1,8 +1,10 @@
 package login
 
 import (
-	"github.com/4color/SiShenCloudDev/skdp-admin-service/cmd"
-	"github.com/4color/SiShenCloudDev/skdp-admin-service/cmd/checkcode"
+	"github.com/4color/SiShenCloudDev/skdp-admin-service/api"
+	"github.com/4color/SiShenCloudDev/skdp-admin-service/api/checkcode"
+	"github.com/4color/SiShenCloudDev/skdp-admin-service/api/token"
+	"github.com/4color/SiShenCloudDev/skdp-admin-service/cmd/muser"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -21,7 +23,7 @@ type LoginResult struct {
 }
 
 func Login(gc *gin.Context) {
-	res := cmd.ResponseBodyModel{http.StatusInternalServerError, "", ""}
+	res := api.ResponseBodyModel{http.StatusInternalServerError, "", ""}
 
 	var param LoginModel
 	err := gc.BindJSON(&param)
@@ -43,7 +45,27 @@ func Login(gc *gin.Context) {
 		return
 	}
 
-	result := LoginResult{"uuid", "token", param.U}
+	//检查用户状态，密码是否正确
+	mUser := muser.Muser{}
+
+	dataUser, err := mUser.GetUserLogin(param.U, param.P)
+	if err != nil {
+		res.Message = err.Error()
+		gc.JSON(http.StatusOK, res)
+		return
+	}
+
+	if (dataUser.Username == "") {
+		res.Message = "用户或密码不正确。"
+		gc.JSON(http.StatusOK, res)
+		return
+	}
+
+	//生成jwt
+	tokenString := token.GetJwt()
+
+	//返回值
+	result := LoginResult{dataUser.Muserid, tokenString, param.U}
 	res.Data = result
 
 	res.Status = http.StatusOK

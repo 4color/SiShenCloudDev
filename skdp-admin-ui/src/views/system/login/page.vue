@@ -138,7 +138,7 @@
                 formLogin: {
                     username: 'admin',
                     password: 'admin',
-                    code: 'v9am'
+                    code: ''
                 },
                 // 表单校验
                 rules: {
@@ -235,6 +235,8 @@
                                     this.$router.replace(this.$route.query.redirect || '/')
                                 } else {
                                     this.$message.error(res.message)
+                                    //  刷新验证码
+                                    this.getCode()
                                 }
                             })
                     } else {

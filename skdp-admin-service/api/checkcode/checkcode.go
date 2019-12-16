@@ -1,7 +1,7 @@
 package checkcode
 
 import (
-	"github.com/4color/SiShenCloudDev/skdp-admin-service/cmd"
+	"github.com/4color/SiShenCloudDev/skdp-admin-service/api"
 	"github.com/gin-gonic/gin"
 	"github.com/mojocn/base64Captcha"
 	"net/http"
@@ -29,7 +29,7 @@ var store = base64Captcha.DefaultMemStore
 //获取验证码
 func Checkcode(gc *gin.Context) {
 
-	res := cmd.ResponseBodyModel{http.StatusInternalServerError, "", ""}
+	res := api.ResponseBodyModel{http.StatusInternalServerError, "", ""}
 
 	param := getCodeString()
 	var driver base64Captcha.Driver
@@ -60,26 +60,25 @@ func Checkcode(gc *gin.Context) {
 	gc.JSON(200, res)
 }
 
-
 //验证证码是否正确
 func CheckCodeVerifyHandle(gc *gin.Context) {
 
-	res := cmd.ResponseBodyModel{http.StatusInternalServerError, "", ""}
+	res := api.ResponseBodyModel{http.StatusInternalServerError, "", ""}
 	var param ConfigJsonBody
 	err := gc.BindJSON(&param)
 	if err != nil {
-		res.Message=err.Error()
+		res.Message = err.Error()
 		gc.JSON(http.StatusOK, res)
 
 	}
 	//verify the captcha
 	body := CheckCodeVerify(param)
 
-	res.Data=body;
+	res.Data = body;
 	gc.JSON(http.StatusOK, res)
 }
 
-func CheckCodeVerify(param ConfigJsonBody)(result map[string]interface{}) {
+func CheckCodeVerify(param ConfigJsonBody) (result map[string]interface{}) {
 
 	//verify the captcha
 	result = map[string]interface{}{"code": 0, "msg": "验证失败"}
