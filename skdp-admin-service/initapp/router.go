@@ -4,12 +4,14 @@ import (
 	"fmt"
 	"github.com/4color/SiShenCloudDev/skdp-admin-service/api/checkcode"
 	"github.com/4color/SiShenCloudDev/skdp-admin-service/api/login"
+	"github.com/4color/SiShenCloudDev/skdp-admin-service/api/xzq"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
 var R *gin.Engine
-func InitRouter()  {
+
+func InitRouter() {
 
 	R = gin.Default()
 
@@ -24,6 +26,9 @@ func InitRouter()  {
 
 		//登陆
 		v1.POST("/manager/login", login.Login)
+
+		//行政区列表
+		v1.POST("/xzq/list", xzq.GetXzqList)
 	}
 }
 

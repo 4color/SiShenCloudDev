@@ -1,14 +1,15 @@
 <template>
     <d2-container type="full" class="page">
-        <el-radio-group v-model="searchType" slot="header"  size="mini">
-            <el-radio label="1">省</el-radio>
-            <el-radio :label="2">市</el-radio>
-            <el-radio :label="3">县</el-radio>
-            <el-radio :label="4">乡镇</el-radio>
-            <el-radio :label="5">村</el-radio>
+        <el-radio-group v-model="form.level" slot="header" size="mini">
+            <el-radio :label=1>省</el-radio>
+            <el-radio :label=2>市</el-radio>
+            <el-radio :label=3>县</el-radio>
+            <el-radio :label=4>乡镇</el-radio>
+            <el-radio :label=5>村</el-radio>
         </el-radio-group>
-        <el-input slot="header" placeholder="请输入查询内容" style="width: 150px;margin-left: 5px""></el-input>
-        <el-button slot="header" style="margin-bottom: 5px; margin-left: 2px">查询</el-button>
+        <el-input slot="header" placeholder="请输入查询内容" style="width: 150px;margin-left: 5px"
+                  v-model="form.where"></el-input>
+        <el-button slot="header" style="margin-bottom: 5px; margin-left: 2px" @click="loadXzqQuery">查询</el-button>
         <el-button slot="header" style="margin-left: 2px" @click="dialogVisible = true">新增</el-button>
 
 
@@ -26,30 +27,26 @@
                             :index="indexMethod">
                     </el-table-column>
                     <el-table-column
-                            prop="sheng"
-                            label="省级"
-                            width="180">
-                    </el-table-column>
-                    <el-table-column
                             prop="xzqmc"
                             label="行政区名称"
                             width="180">
                     </el-table-column>
                     <el-table-column
-                            prop="xzqdm"
-                            label="区县代码">
+                            prop="xzqvalue"
+                            label="行政区代码">
                     </el-table-column>
                     <el-table-column
                             prop="enable"
                             label="有效"
                             width="100"
-                            :filters="[{ text: '有效', value: true }, { text: '无效', value: false }]"
+                            :filters="[{ text: '有效', value: 1 }, { text: '无效', value: 0 }]"
                             :filter-method="filterTag"
                             filter-placement="bottom-end">
                         <template slot-scope="scope">
                             <el-tag
-                                    :type="scope.row.enable ? 'primary' : 'info'"
-                                    disable-transitions>{{scope.row.enable}}</el-tag>
+                                    :type="scope.row.enable=='1' ? 'primary' : 'info'"
+                                    disable-transitions>{{scope.row.enable=='1'?'有效':'无效'}}
+                            </el-tag>
                         </template>
                     </el-table-column>
                     <el-table-column
@@ -59,7 +56,7 @@
                             <el-button
                                     size="mini" icon="el-icon-edit"
                                     title="编辑"
-                                  style="margin-right: 5px;padding: 5px;"
+                                    style="margin-right: 5px;padding: 5px;"
                                     @click="handleEdit(scope.$index, scope.row)">
                             </el-button>
                             <el-popconfirm
@@ -83,7 +80,7 @@
                                     icon="el-icon-check"
                                     title="启用"
                                     style="padding: 5px;"
-                                    v-if="scope.row.enable===false"
+                                    v-if="scope.row.enable===0"
                                     @click="handleDelete(scope.$index, scope.row)">
                             </el-button>
 
@@ -93,7 +90,7 @@
                                     icon="el-icon-close"
                                     title="禁用"
                                     style="padding: 5px;"
-                                    v-if="scope.row.enable"
+                                    v-if="scope.row.enable===1"
                                     @click="handleDelete(scope.$index, scope.row)">
                             </el-button>
 
@@ -110,6 +107,15 @@
                         </template>
                     </el-table-column>
                 </el-table>
+
+                <div class="block" style="text-align: center; padding: 20px">
+                    <el-pagination
+                            :page-size="pagesize"
+                            layout="total, prev, pager, next"
+                            :total="total"
+                            @current-change="handleCurrentChange">
+                    </el-pagination>
+                </div>
             </template>
         </SplitPane>
 
@@ -118,7 +124,7 @@
                 title="新增行政区"
                 :visible.sync="dialogVisible"
                 width="30%"
-                >
+        >
             <el-form ref="form" :model="form" label-width="100px">
                 <el-form-item label="父级行政区">
                     <el-select v-model="form.region" placeholder="请选择活动区域">
@@ -142,99 +148,105 @@
 </template>
 
 <script>
-  export default {
-    name: 'departmentxzq',
-    data () {
-      return {
-        searchType:"3",
-        dialogVisible: false,
-        form: {},
-        data: [
-          {
-            sheng: '浙江省',
-            xzqmc: '拱墅区',
-            xzqdm: '330111',
-            "enable":true
-          },
-          {
-            sheng: '浙江省',
-            xzqmc: '拱墅区',
-            xzqdm: '330111',
-            "enable":true
-          },
-          {
-            sheng: '浙江省',
-            xzqmc: '拱墅区',
-            xzqdm: '330111',
-            "enable":true
-          },
-          {
-            sheng: '浙江省',
-            xzqmc: '拱墅区',
-            xzqdm: '330111',
-            "enable":false
-          }
-        ],
-        xzqdata: [
-          {
-            lable: '全国',
-            value: '00',
-            children: [
-              {
-                lable: '浙江省',
-                value: '33'
-              },
-              {
-                lable: '福建省',
-                value: '35'
-              },
-              {
-                lable: '广东省',
-                value: '44',
-                children: [
-                  {
-                    lable: '广州市',
-                    value: '4401'
-                  },
-                  {
-                    lable: '深圳市',
-                    value: '4402'
-                  }
-                ]
-              },
-              {
-                lable: '浙江省',
-                value: '33'
-              }
-            ]
-          }
-        ],
-        defaultProps: {
-          children: 'children',
-          label: 'lable'
+    import { mapActions } from 'vuex'
+
+    export default {
+        name: 'departmentxzq',
+        data () {
+            return {
+                dialogVisible: false,
+                form: { where: '', level: -1 },
+                data: [],
+                xzqdata: [
+                    {
+                        lable: '全国',
+                        value: '00',
+                        children: [
+                            {
+                                lable: '浙江省',
+                                value: '33'
+                            },
+                            {
+                                lable: '福建省',
+                                value: '35'
+                            },
+                            {
+                                lable: '广东省',
+                                value: '44',
+                                children: [
+                                    {
+                                        lable: '广州市',
+                                        value: '4401'
+                                    },
+                                    {
+                                        lable: '深圳市',
+                                        value: '4402'
+                                    }
+                                ]
+                            },
+                            {
+                                lable: '浙江省',
+                                value: '33'
+                            }
+                        ]
+                    }
+                ],
+                defaultProps: {
+                    children: 'children',
+                    label: 'lable'
+                },
+                pageindex: 1,
+                pagesize: 15,
+                total: 0
+            }
+        },
+        mounted () {
+            this.loadXzqQuery()
+        },
+        methods: {
+            ...mapActions('skdp/xzq', [
+                'GetLoadXzqList'
+            ]),
+            indexMethod (index) {
+                return index + 1
+            },
+            handleEdit (index, row) {
+                console.log(index, row)
+            },
+            handleDelete (index, row) {
+                console.log(index, row)
+            },
+            jumpUrl (row) {
+                this.$router.push('/department/xzqxz/' + row.xzqdm)
+            },
+            filterTag (value, row) {
+                return row.tag === value
+            },
+            //  行政区列表
+            loadXzqQuery () {
+                var model = {
+                    'where': this.form.where,
+                    'level': this.form.level,
+                    'pageindex': this.pageindex,
+                    'pagesize': this.pagesize
+                }
+                this.GetLoadXzqList(model).then((res) => {
+                    if (res != null) {
+                        if (res.status === 200) {
+                            this.total = res.data.count
+                            this.data = res.data.data
+                        } else {
+                            this.$message.error(res.message)
+                        }
+                    }
+                })
+            },
+            handleCurrentChange (val) {
+                this.pageindex = val
+                this.loadXzqQuery()
+            }
         }
-      }
-    },
-    mounted () {
-    },
-    methods: {
-      indexMethod (index) {
-        return index + 1
-      },
-      handleEdit (index, row) {
-        console.log(index, row)
-      },
-      handleDelete (index, row) {
-        console.log(index, row)
-      },
-      jumpUrl (row) {
-        this.$router.push('/department/xzqxz/' + row.xzqdm)
-      },
-      filterTag(value, row) {
-        return row.tag === value
-      },
     }
-  }
 </script>
 
 <style lang="scss" scoped>

@@ -4,7 +4,7 @@ export default {
     namespaced: true,
     actions: {
         //  获取验证码
-       GetCheckCode ({ dispatch }) {
+        GetCheckCode ({ dispatch }) {
            return new Promise((resolve, reject) => {
                // 开始请求登录接口
                CheckCode()
