@@ -29,6 +29,9 @@ func InitRouter() {
 
 		//行政区列表
 		v1.POST("/xzq/list", xzq.GetXzqList)
+		v1.POST("/xzq/add", xzq.XzqAdd)
+		v1.GET("/xzq/id/:id", xzq.GetXzqEntity)
+		v1.GET(" /xzq/value/:id", xzq.GetXzqEntity)
 	}
 }
 

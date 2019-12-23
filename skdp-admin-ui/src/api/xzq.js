@@ -7,3 +7,18 @@ export function LoadXzqList (data) {
         data
     })
 }
+
+export function AddXzq (data) {
+    return request({
+        url: '/xzq/add',
+        method: 'post',
+        data
+    })
+}
+
+export function XzqInfo (data) {
+    return request({
+        url: '/xzq/id/' + data,
+        method: 'get'
+    })
+}

@@ -10,12 +10,19 @@
         <el-input slot="header" placeholder="请输入查询内容" style="width: 150px;margin-left: 5px"
                   v-model="form.where"></el-input>
         <el-button slot="header" style="margin-bottom: 5px; margin-left: 2px" @click="loadXzqQuery">查询</el-button>
-        <el-button slot="header" style="margin-left: 2px" @click="dialogVisible = true">新增</el-button>
+        <el-button slot="header" style="margin-left: 2px" @click="showAddxzq">新增</el-button>
 
 
         <SplitPane :min-percent='17' :default-percent='17' split="vertical">
             <template slot="paneL">
-                <el-tree :data="xzqdata" :props="defaultProps" :auto-expand-parent="true"></el-tree>
+                <el-tree :props="defaultProps" :auto-expand-parent="true" :load="loadXzqTree" @node-click="treeClick"
+                         lazy>
+                      <span slot-scope="{ node, data }">
+      <i class="el-icon-folder"></i>
+      <span style="padding-left: 4px; font-size: 12px">{{data.xzqmc}}</span>
+    </span>
+
+                </el-tree>
             </template>
             <template slot="paneR">
                 <el-table
@@ -57,7 +64,7 @@
                                     size="mini" icon="el-icon-edit"
                                     title="编辑"
                                     style="margin-right: 5px;padding: 5px;"
-                                    @click="handleEdit(scope.$index, scope.row)">
+                                    @click="showEdit(scope.$index, scope.row)">
                             </el-button>
                             <el-popconfirm
                                     title="这是一段内容确定删除吗？"
@@ -127,21 +134,36 @@
         >
             <el-form ref="form" :model="form" label-width="100px">
                 <el-form-item label="父级行政区">
-                    <el-select v-model="form.region" placeholder="请选择活动区域">
-                        <el-option label="区域一" value="shanghai"></el-option>
-                        <el-option label="区域二" value="beijing"></el-option>
-                    </el-select>
+                    {{this.parentxzqmc}}
                 </el-form-item>
                 <el-form-item label="行政区名称">
-                    <el-input v-model="form.name"></el-input>
+                    <el-input v-model="addxzqform.xzqmc"></el-input>
                 </el-form-item>
                 <el-form-item label="行政区代码">
-                    <el-input v-model="form.name"></el-input>
+                    <el-input v-model="addxzqform.xzqvalue"></el-input>
+                </el-form-item>
+                <el-form-item label="年份">
+                    <el-select v-model="addxzqform.xzqnf" placeholder="请选择">
+                        <el-option
+                                v-for="n in nowDate"
+                                :key="n"
+                                :label="n"
+                                :value="n" v-if="n>2015">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="层级">
+                    <el-select v-model="addxzqform.xzqlevel" placeholder="请选择">
+                        <el-option value="1" label="省级"></el-option>
+                        <el-option value="2" label="市级"></el-option>
+                        <el-option value="3" label="区县级"></el-option>
+                        <el-option value="4" label="乡镇级"></el-option>
+                    </el-select>
                 </el-form-item>
             </el-form>
             <span slot="footer" class="dialog-footer">
     <el-button @click="dialogVisible = false">取 消</el-button>
-    <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
+    <el-button type="primary" @click="handleAddxzq">确 定</el-button>
   </span>
         </el-dialog>
     </d2-container>
@@ -154,50 +176,28 @@
         name: 'departmentxzq',
         data () {
             return {
+                nowDate: new Date().getFullYear(),
                 dialogVisible: false,
                 form: { where: '', level: -1 },
+                addxzqform: {
+                    xzqvalue: '',
+                    xzqmc: '',
+                    parentid: '',
+                    xzqnf: this.nowDate,
+                    changetime: '',
+                    xzqlevel: '1',
+                    xzqid: ''
+                },
                 data: [],
-                xzqdata: [
-                    {
-                        lable: '全国',
-                        value: '00',
-                        children: [
-                            {
-                                lable: '浙江省',
-                                value: '33'
-                            },
-                            {
-                                lable: '福建省',
-                                value: '35'
-                            },
-                            {
-                                lable: '广东省',
-                                value: '44',
-                                children: [
-                                    {
-                                        lable: '广州市',
-                                        value: '4401'
-                                    },
-                                    {
-                                        lable: '深圳市',
-                                        value: '4402'
-                                    }
-                                ]
-                            },
-                            {
-                                lable: '浙江省',
-                                value: '33'
-                            }
-                        ]
-                    }
-                ],
                 defaultProps: {
                     children: 'children',
-                    label: 'lable'
+                    label: 'xzqmc'
                 },
                 pageindex: 1,
                 pagesize: 15,
-                total: 0
+                total: 0,
+                parentid: '',
+                parentxzqmc: '全国'
             }
         },
         mounted () {
@@ -205,13 +205,10 @@
         },
         methods: {
             ...mapActions('skdp/xzq', [
-                'GetLoadXzqList'
+                'GetLoadXzqList', 'PutAddXzq', 'GetXzqInfo'
             ]),
             indexMethod (index) {
-                return index + 1
-            },
-            handleEdit (index, row) {
-                console.log(index, row)
+                return ((this.pageindex - 1) * this.pagesize) + index + 1
             },
             handleDelete (index, row) {
                 console.log(index, row)
@@ -228,7 +225,9 @@
                     'where': this.form.where,
                     'level': this.form.level,
                     'pageindex': this.pageindex,
-                    'pagesize': this.pagesize
+                    'pagesize': this.pagesize,
+                    'parentid': this.parentid,
+                    'parentlikeorequal': 'like'
                 }
                 this.GetLoadXzqList(model).then((res) => {
                     if (res != null) {
@@ -241,9 +240,90 @@
                     }
                 })
             },
+            //  行政区列表
+            loadXzqTree (node, resolve) {
+                if (node.level === 0) {
+                    return resolve([{
+                        xzqmc: '全国',
+                        xzqid: ''
+                    }])
+                }
+                var pParentid = node.data.xzqid
+                this.parentxzqmc = node.data.xzqmc
+                var model = {
+                    'where': '',
+                    'level': -1,
+                    'pageindex': 1,
+                    'pagesize': 99,
+                    'parentid': pParentid,
+                    'parentlikeorequal': 'equal'
+                }
+                this.GetLoadXzqList(model).then((res) => {
+                    if (res != null) {
+                        if (res.status === 200) {
+                            this.total = res.data.count
+                            resolve(res.data.data)
+                        } else {
+                            this.$message.error(res.message)
+                        }
+                    }
+                })
+            },
+            //  行政树被点点
+            treeClick (data, node, event) {
+                this.parentid = data.xzqid
+                this.loadXzqQuery()
+            },
             handleCurrentChange (val) {
                 this.pageindex = val
                 this.loadXzqQuery()
+            },
+            showAddxzq () {
+                this.addxzqform.parentid = this.parentid
+                this.addxzqform.changetime = new Date()
+                if (this.parentid.length === 0) {
+                    this.addxzqform.xzqlevel = '1'
+                }
+                if (this.parentid.length === 2) {
+                    this.addxzqform.xzqlevel = '2'
+                }
+                if (this.parentid.length === 4) {
+                    this.addxzqform.xzqlevel = '3'
+                }
+                if (this.parentid.length === 6) {
+                    this.addxzqform.xzqlevel = '4'
+                }
+
+                this.dialogVisible = true
+            },
+            //  新增或编辑行政区
+            handleAddxzq () {
+                this.addxzqform.xzqlevel = parseInt(this.addxzqform.xzqlevel)
+                this.PutAddXzq(this.addxzqform).then((res) => {
+                    if (res != null) {
+                        if (res.status === 200) {
+                            this.$message.success(res.message)
+                            this.loadXzqQuery()
+                            this.dialogVisible = false
+                        } else {
+                            this.$message.error(res.message)
+                        }
+                    }
+                })
+            },
+            //  编辑行政区
+            showEdit (index, row) {
+                this.GetXzqInfo(row.xzqid).then((res) => {
+                    if (res != null) {
+                        if (res.status === 200) {
+                            this.addxzqform = res.data
+                            this.addxzqform.xzqlevel = this.addxzqform.xzqlevel.toString()
+                            this.dialogVisible = true
+                        } else {
+                            this.$message.error(res.message)
+                        }
+                    }
+                })
             }
         }
     }
