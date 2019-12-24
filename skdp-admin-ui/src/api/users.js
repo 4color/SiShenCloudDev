@@ -1,8 +1,8 @@
 import request from '@/plugin/axios'
 
-export function LoadXzqList (data) {
+export function RequestLoadUserList (data) {
     return request({
-        url: '/xzq/list',
+        url: '/users/list',
         method: 'post',
         data
     })

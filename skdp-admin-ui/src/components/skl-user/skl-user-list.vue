@@ -8,32 +8,35 @@
                 :index="indexMethod">
         </el-table-column>
         <el-table-column
-                prop="xzqmc"
                 label="行政区"
                 width="180">
         </el-table-column>
         <el-table-column
-                prop="username"
-                label="用户名"
+                prop="nickname"
+                label="昵称"
                 width="180">
         </el-table-column>
         <el-table-column
-                prop="dwmc"
-                label="单位名称">
+                prop="email"
+                label="电子邮件"
+                width="180">
+        </el-table-column>
+        <el-table-column
+                prop="createdat"
+                label="注册时间">
             <template slot-scope="scope">
-                <el-button type="text" @click="toDetail(scope.row)">{{scope.row.dwmc}}</el-button>
+                {{ProcessTime(scope.row.createdat)}}
             </template>
         </el-table-column>
         <el-table-column
-                prop="regtime"
-                label="注册时间">
+                prop="source"
+                label="注册来源">
         </el-table-column>
         <el-table-column
                 prop="enable"
                 label="有效"
                 width="100"
                 :filters="[{ text: '有效', value: true }, { text: '无效', value: false }]"
-                :filter-method="filterTag"
                 filter-placement="bottom-end">
             <template slot-scope="scope">
                 <el-tag
@@ -102,46 +105,7 @@
     </el-table>
 </template>
 
-<script>
-  export default {
-    name: 'skl-user-list',
-    data () {
-      return {
-        data: [
-          {
-            userid:"test",
-            xzqmc: '拱墅区',
-            username: '浙江省',
-            dwmc: '浙江臻善科技有限公司',
-            'enable': true
-          },
-          {
-            username: '浙江省',
-            xzqmc: '拱墅区',
-            xzqdm: '330111',
-            'enable': true
-          },
-          {
-            sheng: '浙江省',
-            xzqmc: '拱墅区',
-            xzqdm: '330111',
-            'enable': true
-          },
-          {
-            sheng: '浙江省',
-            xzqmc: '拱墅区',
-            xzqdm: '330111',
-            'enable': false
-          }
-        ],
-      }
-    },
-    methods :{
-      toDetail(row) {
-        this.$router.push("/department/userdetail/" + row.userid)
-      }
-    }
-  }
+<script src="./skl-user-list.js">
 </script>
 
 <style scoped>

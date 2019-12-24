@@ -9,9 +9,9 @@ import (
 
 type XzqList struct {
 	Where             string `json:"where"`
-	Pagesize          int32  `json:"pagesize"`
-	Pageindex         int32  `json:"pageindex"`
-	Level             int32  `json:"level"`
+	Pagesize          int  `json:"pagesize"`
+	Pageindex         int  `json:"pageindex"`
+	Level             int  `json:"level"`
 	Parentid          string `json:"parentid"`
 	ParentlikeOrEqual string `json:"parentlikeorequal"`
 }
@@ -89,3 +89,46 @@ func GetXzqEntity(gc *gin.Context) {
 	res.Status = http.StatusOK
 	gc.JSON(200, res)
 }
+
+//删除行政区
+func DeleteXzq(gc *gin.Context) {
+	res := api.ResponseBodyModel{http.StatusInternalServerError, "", ""}
+
+	xzqid := gc.Param("id")
+
+	data, err := xzq.XzqDelete(xzqid)
+	if (err != nil) {
+		res.Message = err.Error()
+		gc.JSON(http.StatusOK, res)
+		return
+	}
+	res.Data = data
+	res.Message = "删除成功"
+	res.Status = http.StatusOK
+	gc.JSON(200, res)
+}
+
+//删除行政区
+func EnableXzq(gc *gin.Context) {
+	res := api.ResponseBodyModel{http.StatusInternalServerError, "", ""}
+
+	xzqid := gc.Param("id")
+	enable := gc.Param("enable")
+
+
+	data, err := xzq.XzqUpdateEnable(xzqid,enable)
+	if (err != nil) {
+		res.Message = err.Error()
+		gc.JSON(http.StatusOK, res)
+		return
+	}
+	if(data) {
+		res.Data = data
+		res.Status = http.StatusOK
+		res.Message = "修改成功"
+	}else {
+		res.Message = "修改失败"
+	}
+	gc.JSON(200, res)
+}
+

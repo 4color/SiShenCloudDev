@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/4color/SiShenCloudDev/skdp-admin-service/api/checkcode"
 	"github.com/4color/SiShenCloudDev/skdp-admin-service/api/login"
+	"github.com/4color/SiShenCloudDev/skdp-admin-service/api/tuser"
 	"github.com/4color/SiShenCloudDev/skdp-admin-service/api/xzq"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -31,7 +32,12 @@ func InitRouter() {
 		v1.POST("/xzq/list", xzq.GetXzqList)
 		v1.POST("/xzq/add", xzq.XzqAdd)
 		v1.GET("/xzq/id/:id", xzq.GetXzqEntity)
-		v1.GET(" /xzq/value/:id", xzq.GetXzqEntity)
+		v1.GET("/xzq/value/:id", xzq.GetXzqEntity)
+		v1.DELETE("/xzq/:id", xzq.DeleteXzq)
+		v1.PUT("/xzq/enable/:id/:enable", xzq.EnableXzq)
+
+		//普通用户
+		v1.POST("/users/list", tuser.ControllerUserList)
 	}
 }
 

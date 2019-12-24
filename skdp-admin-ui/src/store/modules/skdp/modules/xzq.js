@@ -1,4 +1,4 @@
-import { LoadXzqList, AddXzq, XzqInfo } from '@api/xzq'
+import { LoadXzqList, AddXzq, XzqInfo, DeleteXzq, PutEnableXzq } from '@api/xzq'
 
 export default {
     namespaced: true,
@@ -47,7 +47,36 @@ export default {
                         reject(err)
                     })
             })
+        },
+        //  获取行政区
+        DeleteXzq ({ dispatch }, model) {
+            return new Promise((resolve, reject) => {
+                // 开始请求登录接口
+                DeleteXzq(model)
+                    .then(async res => {
+                        // 结束
+                        resolve(res)
+                    })
+                    .catch(err => {
+                        console.log('err: ', err)
+                        reject(err)
+                    })
+            })
+        },
+        //  开启禁用行政区
+        PutEnableXzq ({ dispatch }, model) {
+            return new Promise((resolve, reject) => {
+                // 开始请求登录接口
+                PutEnableXzq(model)
+                    .then(async res => {
+                        // 结束
+                        resolve(res)
+                    })
+                    .catch(err => {
+                        console.log('err: ', err)
+                        reject(err)
+                    })
+            })
         }
-
     }
 }

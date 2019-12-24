@@ -67,7 +67,9 @@
                                     @click="showEdit(scope.$index, scope.row)">
                             </el-button>
                             <el-popconfirm
-                                    title="这是一段内容确定删除吗？"
+                                    title="确定删除吗？"
+                                    icon="el-icon-info"
+                                    @onConfirm="handleDelete(scope.$index, scope.row)"
                             >
                                 <el-button
                                         size="mini"
@@ -76,29 +78,29 @@
                                         title="删除"
                                         slot="reference"
                                         style="margin-right: 5px;padding: 5px;"
-                                        @click="handleDelete(scope.$index, scope.row)">
+                                >
                                 </el-button>
 
                             </el-popconfirm>
 
                             <el-button
                                     size="mini"
-                                    type="warning plain"
-                                    icon="el-icon-check"
+                                    type="success plain"
+                                    icon="el-icon-open"
                                     title="启用"
                                     style="padding: 5px;"
                                     v-if="scope.row.enable===0"
-                                    @click="handleDelete(scope.$index, scope.row)">
+                                    @click="EnabledOrDisableXzq( scope.row,1)">
                             </el-button>
 
                             <el-button
                                     size="mini"
-                                    type="success plain"
-                                    icon="el-icon-close"
+                                    type="Info plain"
+                                    icon="el-icon-turn-off"
                                     title="禁用"
                                     style="padding: 5px;"
                                     v-if="scope.row.enable===1"
-                                    @click="handleDelete(scope.$index, scope.row)">
+                                    @click="EnabledOrDisableXzq( scope.row,0)">
                             </el-button>
 
 
@@ -108,7 +110,7 @@
                                     icon="el-icon-s-tools"
                                     title="行政区扩展"
                                     style="padding: 5px;"
-                                    @click="handleDelete(scope.$index, scope.row)">
+                                   >
                             </el-button>
 
                         </template>
@@ -169,165 +171,7 @@
     </d2-container>
 </template>
 
-<script>
-    import { mapActions } from 'vuex'
-
-    export default {
-        name: 'departmentxzq',
-        data () {
-            return {
-                nowDate: new Date().getFullYear(),
-                dialogVisible: false,
-                form: { where: '', level: -1 },
-                addxzqform: {
-                    xzqvalue: '',
-                    xzqmc: '',
-                    parentid: '',
-                    xzqnf: this.nowDate,
-                    changetime: '',
-                    xzqlevel: '1',
-                    xzqid: ''
-                },
-                data: [],
-                defaultProps: {
-                    children: 'children',
-                    label: 'xzqmc'
-                },
-                pageindex: 1,
-                pagesize: 15,
-                total: 0,
-                parentid: '',
-                parentxzqmc: '全国'
-            }
-        },
-        mounted () {
-            this.loadXzqQuery()
-        },
-        methods: {
-            ...mapActions('skdp/xzq', [
-                'GetLoadXzqList', 'PutAddXzq', 'GetXzqInfo'
-            ]),
-            indexMethod (index) {
-                return ((this.pageindex - 1) * this.pagesize) + index + 1
-            },
-            handleDelete (index, row) {
-                console.log(index, row)
-            },
-            jumpUrl (row) {
-                this.$router.push('/department/xzqxz/' + row.xzqdm)
-            },
-            filterTag (value, row) {
-                return row.tag === value
-            },
-            //  行政区列表
-            loadXzqQuery () {
-                var model = {
-                    'where': this.form.where,
-                    'level': this.form.level,
-                    'pageindex': this.pageindex,
-                    'pagesize': this.pagesize,
-                    'parentid': this.parentid,
-                    'parentlikeorequal': 'like'
-                }
-                this.GetLoadXzqList(model).then((res) => {
-                    if (res != null) {
-                        if (res.status === 200) {
-                            this.total = res.data.count
-                            this.data = res.data.data
-                        } else {
-                            this.$message.error(res.message)
-                        }
-                    }
-                })
-            },
-            //  行政区列表
-            loadXzqTree (node, resolve) {
-                if (node.level === 0) {
-                    return resolve([{
-                        xzqmc: '全国',
-                        xzqid: ''
-                    }])
-                }
-                var pParentid = node.data.xzqid
-                this.parentxzqmc = node.data.xzqmc
-                var model = {
-                    'where': '',
-                    'level': -1,
-                    'pageindex': 1,
-                    'pagesize': 99,
-                    'parentid': pParentid,
-                    'parentlikeorequal': 'equal'
-                }
-                this.GetLoadXzqList(model).then((res) => {
-                    if (res != null) {
-                        if (res.status === 200) {
-                            this.total = res.data.count
-                            resolve(res.data.data)
-                        } else {
-                            this.$message.error(res.message)
-                        }
-                    }
-                })
-            },
-            //  行政树被点点
-            treeClick (data, node, event) {
-                this.parentid = data.xzqid
-                this.loadXzqQuery()
-            },
-            handleCurrentChange (val) {
-                this.pageindex = val
-                this.loadXzqQuery()
-            },
-            showAddxzq () {
-                this.addxzqform.parentid = this.parentid
-                this.addxzqform.changetime = new Date()
-                if (this.parentid.length === 0) {
-                    this.addxzqform.xzqlevel = '1'
-                }
-                if (this.parentid.length === 2) {
-                    this.addxzqform.xzqlevel = '2'
-                }
-                if (this.parentid.length === 4) {
-                    this.addxzqform.xzqlevel = '3'
-                }
-                if (this.parentid.length === 6) {
-                    this.addxzqform.xzqlevel = '4'
-                }
-
-                this.dialogVisible = true
-            },
-            //  新增或编辑行政区
-            handleAddxzq () {
-                this.addxzqform.xzqlevel = parseInt(this.addxzqform.xzqlevel)
-                this.PutAddXzq(this.addxzqform).then((res) => {
-                    if (res != null) {
-                        if (res.status === 200) {
-                            this.$message.success(res.message)
-                            this.loadXzqQuery()
-                            this.dialogVisible = false
-                        } else {
-                            this.$message.error(res.message)
-                        }
-                    }
-                })
-            },
-            //  编辑行政区
-            showEdit (index, row) {
-                this.GetXzqInfo(row.xzqid).then((res) => {
-                    if (res != null) {
-                        if (res.status === 200) {
-                            this.addxzqform = res.data
-                            this.addxzqform.xzqlevel = this.addxzqform.xzqlevel.toString()
-                            this.dialogVisible = true
-                        } else {
-                            this.$message.error(res.message)
-                        }
-                    }
-                })
-            }
-        }
-    }
-</script>
+<script src="./index.js"></script>
 
 <style lang="scss" scoped>
     .page {

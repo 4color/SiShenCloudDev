@@ -31,4 +31,13 @@ util.open = function (url) {
   document.body.removeChild(document.getElementById('d2admin-link-temp'))
 }
 
+//  处理日期
+util.ProcessTime = function (data) {
+  if (data) {
+    return data.replace('T', ' ').replace('Z', '')
+  } else {
+    return data
+  }
+}
+
 export default util

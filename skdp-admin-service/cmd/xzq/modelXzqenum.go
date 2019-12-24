@@ -3,6 +3,7 @@ package xzq
 import (
 	"github.com/4color/SiShenCloudDev/skdp-admin-service/cmd/db"
 	"github.com/pkg/errors"
+	"strconv"
 	"time"
 )
 
@@ -15,11 +16,11 @@ type MODEL_XZQ_ENUM struct {
 	Xzqvalue   string    `json:"xzqvalue" gorm:"column:XZQ_VALUE"`
 	Xzqmc      string    `json:"xzqmc" gorm:"column:XZQ_MC"`
 	Parentid   string    `json:"parentid" gorm:"column:PARENT_ID"`
-	Xzqorder   int32     `json:"xzqorder" gorm:"column:XZQ_ORDER"`
-	Enable     int32     `json:"enable" gorm:"column:ENABLE"`
-	Xzqnf      int32     `json:"xzqnf" gorm:"column:XZQ_NF"`
+	Xzqorder   int       `json:"xzqorder" gorm:"column:XZQ_ORDER"`
+	Enable     int       `json:"enable" gorm:"column:ENABLE"`
+	Xzqnf      int       `json:"xzqnf" gorm:"column:XZQ_NF"`
 	Changetime time.Time `json:"changetime" gorm:"column:CHANGE_TIME"`
-	Xzqlevel   int32     `json:"xzqlevel" gorm:"column:XZQ_LEVEL"`
+	Xzqlevel   int       `json:"xzqlevel" gorm:"column:XZQ_LEVEL"`
 }
 
 type XzqListResult struct {
@@ -28,7 +29,7 @@ type XzqListResult struct {
 }
 
 //获取行政区列表,第几页
-func XzqList(pagesize int32, pageindex int32, where string, level int32, parentid string, ParentlikeOrEqual string) (result XzqListResult, err error) {
+func XzqList(pagesize int, pageindex int, where string, level int, parentid string, ParentlikeOrEqual string) (result XzqListResult, err error) {
 
 	if (pagesize > 100) {
 		err = errors.New("每页数量不能超过100")
@@ -95,5 +96,31 @@ func XzqAddEntity(xzqModel MODEL_XZQ_ENUM) (result MODEL_XZQ_ENUM, err error) {
 		db.SqlDB.Where(&MODEL_XZQ_ENUM{Xzqvalue: xzqModel.Xzqvalue}).First(&result)
 	}
 
+	return
+}
+
+//删除行政区
+func XzqDelete(Xzqid string) (result bool, err error) {
+
+	if (Xzqid != "") {
+		db.SqlDB.Delete(&MODEL_XZQ_ENUM{Xzqid: Xzqid})
+		result = true
+	}
+
+	return
+}
+
+//删除行政区
+func XzqUpdateEnable(Xzqid string, enable string) (result bool, err error) {
+
+	if (Xzqid != "") {
+		var m MODEL_XZQ_ENUM
+		db.SqlDB.Where(&MODEL_XZQ_ENUM{Xzqid: Xzqid}).First(&m)
+		newint, _ := strconv.Atoi(enable)
+		m.Enable = newint
+		db.SqlDB.Save(&m)
+
+		result = true
+	}
 	return
 }

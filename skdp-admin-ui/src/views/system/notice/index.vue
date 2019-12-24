@@ -24,7 +24,7 @@
             <el-table-column
                     prop="title"
                     label="公告标题"
-                   >
+            >
                 <template slot-scope="scope">
                     <el-button type="text" @click="toDetail(scope.row)">{{scope.row.title}}</el-button>
                 </template>
@@ -110,46 +110,46 @@
 </template>
 
 <script>
-  export default {
-    name: 'noticeindex',
-    data () {
-      return {
-        data: [
-          {
-            articleid: 'test',
-            pubtime: 'test',
-            title: '拱墅区',
-            user: '浙江省',
-            'enable': true
-          },
-          {
-            articleid: 'test',
-            username: '浙江省',
-            xzqmc: '拱墅区',
-            xzqdm: '330111',
-            'enable': true
-          },
-          {
-            sheng: '浙江省',
-            xzqmc: '拱墅区',
-            xzqdm: '330111',
-            'enable': true
-          },
-          {
-            sheng: '浙江省',
-            xzqmc: '拱墅区',
-            xzqdm: '330111',
-            'enable': false
-          }
-        ],
-      }
-    },
-    methods: {
-      toDetail (row) {
-        this.$router.push('/system/noticedetail/' + row.articleid)
-      }
+    export default {
+        name: 'noticeindex',
+        data () {
+            return {
+                data: [
+                    {
+                        articleid: 'test',
+                        pubtime: 'test',
+                        title: '拱墅区',
+                        user: '浙江省',
+                        'enable': true
+                    },
+                    {
+                        articleid: 'test',
+                        username: '浙江省',
+                        xzqmc: '拱墅区',
+                        xzqdm: '330111',
+                        'enable': true
+                    },
+                    {
+                        sheng: '浙江省',
+                        xzqmc: '拱墅区',
+                        xzqdm: '330111',
+                        'enable': true
+                    },
+                    {
+                        sheng: '浙江省',
+                        xzqmc: '拱墅区',
+                        xzqdm: '330111',
+                        'enable': false
+                    }
+                ]
+            }
+        },
+        methods: {
+            toDetail (row) {
+                this.$router.push('/system/noticedetail/' + row.articleid)
+            }
+        }
     }
-  }
 </script>
 
 <style scoped>

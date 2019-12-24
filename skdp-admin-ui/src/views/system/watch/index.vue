@@ -53,31 +53,24 @@
 
 <script>
 
-  export default {
-    name: 'watchindex',
-    data () {
-      return {
-        chartData: {
-          columns: ['city', 'percent'],
-          rows: [{
-            city: 'CPU',
-            percent: 0.6
-          }]
+    export default {
+        name: 'watchindex',
+        data () {
+            return {
+                chartData: {
+                    columns: ['city', 'percent'],
+                    rows: [{
+                        city: 'CPU',
+                        percent: 0.6
+                    }]
+                }
+            }
         }
-      }
-    }, mounted () {
-      // 加载完成后显示提示
-      //this.showInfo()
-    }, methods: {
-
     }
-  }
 </script>
 
 <style lang="scss" scoped>
-    .el-alert__title
-    {
+    .el-alert__title {
         font-size: 20px !important;
     }
-
 </style>
